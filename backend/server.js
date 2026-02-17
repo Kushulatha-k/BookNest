@@ -11,13 +11,28 @@ connectDB();
 const app = express();
 
 // =============================
-// Middleware
+// CORS Configuration
 // =============================
 
-// Enable CORS for all origins (for deployment)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://book-nest-six-topaz.vercel.app"
+];
+
 app.use(
   cors({
-    origin: "*",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
   })
 );
 
@@ -32,7 +47,7 @@ app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/books", require("./routes/bookRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
 
-// Test Route
+// Root Test Route
 app.get("/", (req, res) => {
   res.send("🚀 BookNest Backend Running...");
 });
